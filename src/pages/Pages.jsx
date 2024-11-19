@@ -14,9 +14,10 @@ export default function Posts() {
   const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
   const [totals, setTotals] = useState(0);
-
+  const [editcomment, setEditcomment] = useState(false)
   const lastElement = useRef();
   const observer = useRef();
+  const [editingPost, setEditingPost] = useState(null);
 
 
   useEffect(() => {
@@ -78,6 +79,29 @@ export default function Posts() {
     setList((prevList) => prevList.filter((p) => p.id !== post.id));
   };
 
+
+const editcom = () => {
+  const title = refs.title.current.value.trim();
+  const body = refs.body.current.value.trim();
+
+  if (title && body && editingPost) {
+    setList((prevList) =>
+      prevList.map((post) =>
+        post.id === editingPost.id
+          ? { ...post, title, body }
+          : post
+      )
+    );
+    setOpen(false);
+    setEditcomment(false);
+    setEditingPost(null);
+    refs.title.current.value = refs.body.current.value = "";
+  } else {
+    alert("Введите название и описание!");
+  }
+};
+
+
   if (open) {
     refs.dialog.current.oncancel = () => setOpen(false);
   }
@@ -96,13 +120,16 @@ export default function Posts() {
         <h2>Создать пользователя</h2>
         <Input placeholder="Имя" ref={refs.title} />
         <Input placeholder="Город" ref={refs.body} />
+        {editcomment?
+        <Button onClick={editcom}>Редактироват пользователя</Button>:
         <Button onClick={handleClick}>Добавить пользователя</Button>
+      }
       </Dialog>
       {loader && page===1? (
         <span className="loader"></span>
       ) : (
         <>
-          <PostList list={list} onClick={deletePost} />
+          <PostList list={list} onClick={deletePost} editComment={editcom} />
           <div ref={lastElement} style={{ height: 20}} />
         </>
       )}
