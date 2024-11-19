@@ -6,7 +6,6 @@ export default function PostPage() {
   const [post, setPost] = useState(),
     [comments, setComments] = useState([]);
   const params = useParams();
-
   useEffect(() => {
     (async function () {
       setPost((await PostService.getById(params.id)).data);

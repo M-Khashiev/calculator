@@ -13,10 +13,14 @@ export default function PostList({ list, onClick }) {
     return  list.sort((a,b) => a[value].localeCompare(b[value])).filter((post) => post.title.includes(query));
   }, [query, list,value]);
 
+let edit=(e)=>{
+  console.log(e.target);
+}
+
 
   return (
     <>
-    <select onChange={(e)=>setValue(e.target.value)}>
+    <select onChange={edit}>
     <option value="title">Title</option>
     <option value="body">Body</option>
     </select>
@@ -24,8 +28,8 @@ export default function PostList({ list, onClick }) {
       {search.map((post, index) => (
         <div key={post.id}>
           <h2>{index+1}. {post.title}</h2>
-          <p>{post.body}</p>
-          <Button onClick={() => navigate(`/posts/${post.id}`)}>Open</Button> {/* Используем navigate */}
+          <p onClick={(e)=>console.log(e.target)}>{post.body}</p>
+          <Button onClick={() => navigate(`/posts/${post.id}`)}>Open</Button>
           <Button onClick={() => onClick(post)}>Delete</Button>
         </div>
       ))}
