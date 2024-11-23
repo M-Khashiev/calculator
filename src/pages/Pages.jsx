@@ -6,39 +6,34 @@ import Dialog from "../components/Modal";
 import PostService from "../components/useFetch";
 import Navbar from "../components/Navbar";
 
-
 export default function Posts() {
   const [list, setList] = useState([]);
   const [loader, setLoader] = useState(true);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
   const [totals, setTotals] = useState(0);
-  const [editcomment, setEditcomment] = useState(false)
+  const [editPost, setEditPost] = useState()
   const lastElement = useRef();
   const observer = useRef();
-  const [editingPost, setEditingPost] = useState(null);
-
 
   useEffect(() => {
     (async function () {
       setLoader(true);
-        const response = await PostService.getAll(limit, page);
-        setList((prevList) => [...prevList, ...response.data]);
-        setTotals(response.headers["x-total-count"]);
-        setLoader(false);
+      const response = await PostService.getAll(page);
+      setList((prevList) => [...prevList, ...response.data]);
+      setTotals(response.headers["x-total-count"]);
+      setLoader(false);
     })();
-  }, [page, limit]);
+  }, [page]);
 
   useEffect(() => {
     if (loader) return;
 
-    const callback = (entries)=> {
-      console.log(entries)
-      if (entries[0].isIntersecting && page * limit < totals) {
+    const callback = (entries) => {
+      if (entries[0].isIntersecting && page * 10 < totals) {
         setPage((prevPage) => prevPage + 1);
+        console.log(entries[0])
       }
-      
     };
 
     observer.current = new IntersectionObserver(callback);
@@ -62,11 +57,11 @@ export default function Posts() {
   const handleClick = () => {
     const title = refs.title.current.value.trim();
     const body = refs.body.current.value.trim();
-  
+
     if (title && body) {
       setList((prevList) => [
         ...prevList,
-        { userId: Math.random(), id: Math.random(), title, body }
+        { userId: Math.random(), id: Math.random(), title, body },
       ]);
       setOpen(false);
       refs.title.current.value = refs.body.current.value = "";
@@ -74,39 +69,42 @@ export default function Posts() {
       alert("Введите название и описание!");
     }
   };
-  
+
   const deletePost = (post) => {
     setList((prevList) => prevList.filter((p) => p.id !== post.id));
   };
 
+  const handleEditClick = (post) => {
+    // Заполняем значения инпутов
+    refs.title.current.value = post.title;
+    refs.body.current.value = post.body;
 
-const editcom = () => {
-  const title = refs.title.current.value.trim();
-  const body = refs.body.current.value.trim();
+    setEditPost(post);
+    console.log(post)
+    setOpen(true);
+  }
 
-  if (title && body && editingPost) {
+  const editcom = () => {
+    const title = refs.title.current.value.trim();
+    const body = refs.body.current.value.trim();
+
+    if (!title || !body) {
+      alert("Введите название и описание!");
+      return;
+    }
+
     setList((prevList) =>
-      prevList.map((post) =>
-        post.id === editingPost.id
-          ? { ...post, title, body }
-          : post
+      prevList.map((p) =>
+        p.id === editPost.id
+          ? { ...p, title, body }
+          : p
       )
     );
+
     setOpen(false);
-    setEditcomment(false);
-    setEditingPost(null);
+    setEditPost()
     refs.title.current.value = refs.body.current.value = "";
-  } else {
-    alert("Введите название и описание!");
-  }
-};
-
-
-  if (open) {
-    refs.dialog.current.oncancel = () => setOpen(false);
-  }
-
-
+  };
 
   return (
     <>
@@ -117,20 +115,25 @@ const editcom = () => {
         <Button className="close" onClick={() => setOpen(false)}>
           Закрыть
         </Button>
-        <h2>Создать пользователя</h2>
+        <h2>{editPost ? "Редактировать пользователя" : "Создать пользователя"}</h2>
         <Input placeholder="Имя" ref={refs.title} />
         <Input placeholder="Город" ref={refs.body} />
-        {editcomment?
-        <Button onClick={editcom}>Редактироват пользователя</Button>:
-        <Button onClick={handleClick}>Добавить пользователя</Button>
-      }
+        {editPost ? (
+          <Button onClick={editcom}>Редактировать пользователя</Button>
+        ) : (
+          <Button onClick={handleClick}>Добавить пользователя</Button>
+        )}
       </Dialog>
-      {loader && page===1? (
+      {loader && page === 1 ? (
         <span className="loader"></span>
       ) : (
         <>
-          <PostList list={list} onClick={deletePost} editComment={editcom} />
-          <div ref={lastElement} style={{ height: 20}} />
+          <PostList
+            list={list}
+            onClick={deletePost}
+            onEdit={handleEditClick}
+          />
+          <div ref={lastElement} style={{ height: 20 }} />
         </>
       )}
     </>

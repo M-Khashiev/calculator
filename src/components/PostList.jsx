@@ -3,7 +3,7 @@ import Button from "./Button";
 import Input from "./Input";
 import { useNavigate } from "react-router-dom"; // Импортируем useNavigate
 
-export default function PostList({ list, onClick,editComment}) {
+export default function PostList({ list, onClick, onEdit}) {
   const [query, setQuery] = useState("");
   const [value, setValue] = useState("title");
   const navigate = useNavigate();
@@ -21,9 +21,10 @@ export default function PostList({ list, onClick,editComment}) {
       {search.map((post, index) => (
         <div key={post.id}>
           <h2>{index+1}. {post.title}</h2>
-          <p onClick={editComment}>{post.body}</p>
+          <p>{post.body}</p>
           <Button onClick={() => navigate(`/posts/${post.id}`)}>Open</Button>
           <Button onClick={() => onClick(post)}>Delete</Button>
+          <Button onClick={() => onEdit(post)}>Редактировать</Button>
         </div>
       ))}
     </>
