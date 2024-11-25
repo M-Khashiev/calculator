@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Button from "./Button";
 import Input from "./Input";
-import { useNavigate } from "react-router-dom"; // Импортируем useNavigate
+import { useNavigate } from "react-router-dom";
 
 export default function PostList({ list, onClick, onEdit}) {
   const [query, setQuery] = useState("");

@@ -75,7 +75,6 @@ export default function Posts() {
   };
 
   const handleEditClick = (post) => {
-    // Заполняем значения инпутов
     refs.title.current.value = post.title;
     refs.body.current.value = post.body;
 
