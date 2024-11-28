@@ -1,47 +1,21 @@
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import Pages from "./pages/Pages";
-import PostPage from "./pages/PostPage";
-import { useState, useEffect } from "react";
-import { AuthContext } from "./components/context";
+import { useEffect, useReducer } from "react";
+import {store} from "./components/store.js";
 
 export default function App() {
-  const storedAuth = localStorage.getItem("auth") === "true";
-
-  const [auth, setAuth] = useState(storedAuth);
-
-  useEffect(() => {
-    localStorage.setItem("auth", auth);
-  }, [auth]);
+  const [,forceUpdate]=useReducer(x=>x+1,0)
 
 
-  console.log(typeof null)
+  useEffect(() =>{
+   const unsubscribe=store.subscribe(()=>{
+     forceUpdate()
+   })
+   return unsubscribe;
+  },[])
   return (
-    <AuthContext.Provider value={{ auth, setAuth }}>
-      <BrowserRouter>
-        <Routes>
-          {auth ? (
-            <>
-              <Route path="/posts" element={<Pages />} />
-              <Route path="/posts/:id" element={<PostPage />} />
-              <Route path="*" element={<Navigate to="/posts" replace />} />
-            </>
-          ) : (
-            <>
-              <Route
-                path="/login"
-                element={
-                  <>
-                    <input type="text" />
-                    <input type="password" />
-                    <button onClick={() => setAuth(true)}>Submit</button>
-                  </>
-                }
-              />
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </>
-          )}
-        </Routes>
-      </BrowserRouter>
-    </AuthContext.Provider>
+    <>
+    counter{store.getState().counter}
+      <button onClick={()=>store.dispatch({type:"increment"})}>increment</button>
+      <button onClick={()=>store.dispatch({type:"decrement"})}>decrement</button>
+    </>
   );
 }
